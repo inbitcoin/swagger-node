@@ -43,6 +43,7 @@ function Swagger() {
     if (error.code && error.message)
       res.send(JSON.stringify(error), error.code);
     else {
+      console.log(error)
       console.error(req.method + " failed for path '" + require('url').parse(req.url).href + "': " + error);
       res.send(JSON.stringify({
         "message": "unknown error",
@@ -162,6 +163,7 @@ Swagger.prototype.addPropertiesToRequiredModels = function(properties, requiredM
         break;
       case "string":
       case "integer":
+      case "boolean":
         break;
       default:
         if (requiredModels.indexOf(type) < 0) {
@@ -259,23 +261,50 @@ Swagger.prototype.filterApiListing = function(req, res, r) {
     }
   });
 
-  //  look in object graph
+
+   //  rotem look in object graph correctly
+   this.recuseAddModels(output.models, requiredModels, output);
+
+/*  //  look in object graph
   _.forOwn(output.models, function (model) {
+    console.log( model)
     if (model && model.properties) {
       self.addPropertiesToRequiredModels(model.properties, requiredModels);
     }
   });
   _.forOwn(requiredModels, function (modelName) {
+    console.log("--- requiredModels " + modelName)
     if (!output[modelName]) {
       var model = self.allModels[modelName];
       if (model) {
         output.models[modelName] = model;
       }
     }
-  });
+  });*/
 
   return output;
 };
+
+Swagger.prototype.recuseAddModels = function(modelsin, requiredModels, output) {
+   var self = this;
+   //  look in object graph
+  _.forOwn(modelsin, function (model) {
+  //  console.log( model)
+    if (model && model.properties) {
+      self.addPropertiesToRequiredModels(model.properties, requiredModels);
+    }
+  });
+  _.forOwn(requiredModels, function (modelName) {
+    if (!output.models[modelName]) {
+      var model = self.allModels[modelName];
+      if (model) {
+        output.models[modelName] = model;
+        self.recuseAddModels([model], requiredModels,  output);
+      }
+    }
+  });
+
+}
 
 var mappings = {
   "int": {
@@ -455,7 +484,24 @@ Swagger.prototype.addMethod = function(app, callback, spec) {
         }), 403);
       } else {
         try {
+          
+          // rotev - add block for validation
+          var validate = require('swagger-validation');
+          var ret = validate(spec, req, self.allModels);
+          if(ret.length) {
+            var errors = _.pluck(_.pluck(ret, 'error'), 'message');
+            res.send(JSON.stringify({
+              'message': 'validation failure - ' + errors.join(),
+              'code': 400
+            }), 400);
+            return;
+          }
+          // = end block added
           callback(req, res, next);
+          
+
+
+
         } catch (error) {
           if (typeof self.errorHandler === "function") {
             self.errorHandler(req, res, error);

@@ -26,26 +26,27 @@ exports.query = exports.q = function(name, description, type, required, allowabl
   };
 };
 
-exports.path = function(name, description, type, allowableValuesEnum, defaultValue) {
+exports.path = function(name, description, type, required,allowableValuesEnum, defaultValue) {
   return {
     "name" : name,
     "description" : description,
     "type" : type,
-    "required" : true,
+    "required" : required,
     "enum" : allowableValuesEnum,
     "paramType" : "path",
     "defaultValue" : defaultValue
   };
 };
 
-exports.body = function(name, description, type, defaultValue) {
+exports.body = function(name, description, type, defaultValue, items) {
   return {
     "name" : name,
     "description" : description,
     "type" : type,
     "required" : true,
     "paramType" : "body",
-    "defaultValue" : defaultValue
+    "defaultValue" : defaultValue,
+    "items": items
   };
 };
 
