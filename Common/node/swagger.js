@@ -435,11 +435,16 @@ Swagger.prototype.addMethod = function(app, callback, spec) {
   var apiRootPath = spec.path.split(/[\/\(]/)[1];
   var root = self.resources[apiRootPath];
 
+  console.log(spec.path)
   if (root && root.apis) {
     // this path already exists in swagger resources
+    console.log('path exisits')
     _.forOwn(root.apis, function (api) {
-      if (api && api.path == spec.path && api.method == spec.method) {
+      console.log('compare: ' + api.path + ' to ' + spec.path)
+      console.log('compare: ' + api.method + ' to ' + spec.method)
+      if (api && api.path == spec.path && api.method.toLowerCase() == spec.method.toLowerCase()) {
         // add operation & return
+        console.log('appended')
         appendToApi(root, api, spec);
         return;
       }
@@ -471,7 +476,10 @@ Swagger.prototype.addMethod = function(app, callback, spec) {
   //  convert .{format} to .json, make path params happy
   var fullPath = spec.path.replace(self.formatString, self.jsonSuffix).replace(/\/{/g, "/:").replace(/\}/g, "");
   var currentMethod = spec.method.toLowerCase();
+  console.log('method: ' + currentMethod)
+  api.method = currentMethod
   if (allowedMethods.indexOf(currentMethod) > -1) {
+    console.log('adding route: ' + currentMethod + ' path: ' +  fullPath)
     app[currentMethod](fullPath, function (req, res, next) {
       self.setHeaders(res);
 
@@ -596,6 +604,28 @@ Swagger.prototype.addPatch = Swagger.prototype.addPATCH = function() {
 };
 
 // adds models to swagger
+
+Swagger.prototype.hasModel  = function(property, cb) {
+  return (this.allModels && _.has(this.allModels, property))
+}
+
+Swagger.prototype.hasModels = function(models, cb) {
+  models = _.cloneDeep(models).models;
+  var self = this;
+  if(!self.allModels)
+    return false
+  else {
+    var found = false
+    _.forOwn(models, function (model, key) {
+        if(self.allModels[key]) {
+          found = true
+          return false
+        }
+        return true
+    })
+    return found
+  }
+}
 
 Swagger.prototype.addModels = function(models) {
   models = _.cloneDeep(models).models;
