@@ -879,7 +879,7 @@
         }
       }
       if ((queryParams != null) && queryParams.length > 0) {
-        url += "?" + queryParams;
+        url += (url.endsWith('?')? '' : '?') + queryParams;
       }
       return url;
     };
