@@ -486,10 +486,10 @@ Swagger.prototype.addMethod = function(app, callback, spec) {
       // todo: needs to do smarter matching against the defined paths
       var path = req.url.split('?')[0].replace(self.jsonSuffix, "").replace(/{.*\}/, "*");
       if (!self.canAccessResource(req, path, req.method)) {
-        res.send(JSON.stringify({
-          "message": "forbidden",
-          "code": 403
-        }), 403);
+        next({
+          "message": "Forbidden",
+          "status": 403
+        });
       } else {
         try {
           
@@ -498,10 +498,11 @@ Swagger.prototype.addMethod = function(app, callback, spec) {
           var ret = validate(spec, req, self.allModels);
           if(ret.length) {
             var errors = _.pluck(_.pluck(ret, 'error'), 'message');
-            res.send(JSON.stringify({
-              'message': 'validation failure - ' + errors.join(),
-              'code': 400
-            }), 400);
+            next({
+              'message': 'Validation error',
+              'explanation': errors.join(),
+              'status': 400
+            });
             return;
           }
           // = end block added
