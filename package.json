@@ -4,9 +4,13 @@
   "author": {
     "name": "Tony Tam",
     "email": "fehguy@gmail.com",
-    "url": "http://developer.wordnik.com"
+    "url": "https://inbitcoin.it/"
   },
   "contributors": [
+    {
+      "name": "inbitcoin s.r.l.",
+      "email": "info@inbitcoin.it"
+    },
     {
       "name": "Pauh Hill",
       "email": "phill@kixeye.com"
@@ -15,7 +19,7 @@
   "description": "Wordnik swagger implementation for the express framework",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wordnik/swagger-node-express"
+    "url": "https://github.com/inbitcoin/swagger-node"
   },
   "keywords": [
     "http",
